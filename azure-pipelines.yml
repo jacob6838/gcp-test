@@ -10,6 +10,14 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+  displayName: 'npm install'
 
 - task: DownloadSecureFile@1
   name: authkey
@@ -17,6 +25,14 @@ steps:
   inputs:
     secureFile: 'GoogleServiceAccountKey.json'
     retryCount: '2'
+
+- script: |
+    wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz
+    tar zxvf google-cloud-sdk.tar.gz && ./google-cloud-sdk/install.sh --quiet --usage-reporting=false --path-update=true
+    PATH="google-cloud-sdk/bin:${PATH}"
+    gcloud --quiet components update
+    echo $(authkey.secureFilePath)
+  displayName: 'install gcloud SDK'
 
 # - script:
 #     gcloud auth activate-service-account --key-file $(authkey.secureFilePath)
